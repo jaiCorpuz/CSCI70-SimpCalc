@@ -391,4 +391,4 @@ for infile in input_files:
     # Writes everything to corresponding output file
     with open(outfile, "w") as out:
         for tokentype, tokenvalue in tokens:
-            out.write(f"{tokentype}\t{tokenvalue}\n")
+            out.write(f"{tokentype:<17}{tokenvalue}\n")
