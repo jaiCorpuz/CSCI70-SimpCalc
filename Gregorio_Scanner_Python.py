@@ -332,63 +332,69 @@ def gettoken(state, inputChar, input):
             return state, inputChar, input
 
 # This gets all of the txt files in the current directory
-input_files = glob.glob("input*.txt")  
+def scan():
+    input_files = glob.glob("input*.txt")  
+    generated_files = []
 
-for infile in input_files:
-    # Extract number at the end of filename so that we can attach it to the output file like how it is patterned in the sample files
-    match = re.search(r'(\d+)\.txt$', infile)
-    if match:
-        num = match.group(1)
-    else:
-        #If no number is found, we leave it blank, jic there is an input file like that it will still be processed and outputted :DD
-        num = "" 
+    for infile in input_files:
+        # Extract number at the end of filename so that we can attach it to the output file like how it is patterned in the sample files
+        match = re.search(r'(\d+)\.txt$', infile)
+        if match:
+            num = match.group(1)
+        else:
+            #If no number is found, we leave it blank, jic there is an input file like that it will still be processed and outputted :DD
+            num = "" 
 
-    # This builds the output file name to satisfy the instruction
-    #"If the input file is named sample input.txt, then the output file for the scanner should be sample output scan.txt"
-    base_name = "sample_output_scan"
-    if num:
-        outfile = f"{base_name}_{num}.txt" #adds the number like the sample files!
-    else:
-        outfile = f"{base_name}.txt"
+        # This builds the output file name to satisfy the instruction
+        #"If the input file is named sample input.txt, then the output file for the scanner should be sample output scan.txt"
+        base_name = "sample_output_scan"
+        if num:
+            outfile = f"{base_name}_{num}.txt" #adds the number like the sample files!
+        else:
+            outfile = f"{base_name}.txt"
 
-    # Clears the tokens for each file
-    tokens = []
-    with open(infile, "r") as f:
-        lines = f.readlines()
+        # Clears the tokens for each file
+        global tokens 
+        tokens = []
+        with open(infile, "r") as f:
+            lines = f.readlines()
 
-    for line in lines:
-        chars = list(line)
-        state = "0"
-        pushback = None
-        input_str = ""
+        for line in lines:
+            chars = list(line)
+            state = "0"
+            pushback = None
+            input_str = ""
 
-        #loops through the elements of the list
-        for x in chars:
-            #This means if there is a pushback, meaning we have to reprocess the character
-            if pushback is not None:
-                n = pushback
-                pushback = None
-                state, pushback, input_str = gettoken(state, n, input_str)
-            
-            #This is where the reprocessing happens
-            state, pushback, input_str = gettoken(state, x, input_str)
-
-            #This is to account for the elements that get stuck in num and arent able to process themselves so that it gets pushed out
-            if state in ("num", "divide", "ident", "colon", "multiply", "lessthan", "greaterthan"):
+            #loops through the elements of the list
+            for x in chars:
+                #This means if there is a pushback, meaning we have to reprocess the character
+                if pushback is not None:
+                    n = pushback
+                    pushback = None
+                    state, pushback, input_str = gettoken(state, n, input_str)
+                
+                #This is where the reprocessing happens
                 state, pushback, input_str = gettoken(state, x, input_str)
 
-        #This is to account for the last element that might be stuck in pushback states so that it gets pushed out
-        if state in ("num", "4") and input_str != "":
-            tokens.append(("Num", input_str))
-        elif state == "1":
-            tokens.append(("Divide", input_str))
-        elif pushback is not None:
-            gettoken(state, pushback, input_str)
+                #This is to account for the elements that get stuck in num and arent able to process themselves so that it gets pushed out
+                if state in ("num", "divide", "ident", "colon", "multiply", "lessthan", "greaterthan"):
+                    state, pushback, input_str = gettoken(state, x, input_str)
 
-    # Appends the EndOfFile after the scanning
-    tokens.append(("EndOfFile", ""))
+            #This is to account for the last element that might be stuck in pushback states so that it gets pushed out
+            if state in ("num", "4") and input_str != "":
+                tokens.append(("Num", input_str))
+            elif state == "1":
+                tokens.append(("Divide", input_str))
+            elif pushback is not None:
+                gettoken(state, pushback, input_str)
 
-    # Writes everything to corresponding output file
-    with open(outfile, "w") as out:
-        for tokentype, tokenvalue in tokens:
-            out.write(f"{tokentype:<17}{tokenvalue}\n")
+        # Appends the EndOfFile after the scanning
+        tokens.append(("EndOfFile", ""))
+
+        # Writes everything to corresponding output file
+        with open(outfile, "w") as out:
+            for tokentype, tokenvalue in tokens:
+                out.write(f"{tokentype:<17}{tokenvalue}\n")
+
+        generated_files.append(outfile)
+    return generated_files
