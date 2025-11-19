@@ -80,9 +80,9 @@ class Parser:
             self.errors.append(f"Expected {token_type}, got {self.current_token}")
             raise Exception(f"Syntax Error: Expected {token_type}, got {self.current_token}")
 
-    # -------------------------------------------------
+
     # Main parse entry
-    # -------------------------------------------------
+    # --------------------------------------------------
     def parse(self):
         try:
             self.program()
@@ -106,9 +106,8 @@ class Parser:
         return self.output_lines
         
 
-    # -------------------------------------------------
     # Grammar rules
-    # -------------------------------------------------
+    # --------------------------------------------------
     def program(self):
         while self.current_token != "EndOfFile":
             if self.current_token in ("Identifier", "Print", "If"):
