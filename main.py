@@ -1,21 +1,18 @@
-import glob
+from Gregorio_Scanner_Python import scan
 from Corpuz_Parser_Python import Parser
 
-scan_outputs = glob.glob("sample_output_scan*.txt")
+scan_files = scan()
 
-for scan_file in scan_outputs:
+# 2. For each scan file, run the parser
+for scan_file in scan_files:
+    # extract number (same logic as before)
     parts = scan_file.replace(".txt", "").split("_")
     num = parts[-1] if parts[-1].isdigit() else ""
 
-    if num:
-        parser_out = f"sample_output_parser_{num}.txt"
-    else:
-        parser_out = "sample_output_parser.txt"
+    parser_out = f"sample_output_parser_{num}.txt" if num else "sample_output_parser.txt"
 
     with open(parser_out, "w") as out:
-        p = Parser(scan_file)
-        lines = p.parse()
-
-        # Write ONLY the parser output (including validity)
+        parser = Parser(scan_file)
+        lines = parser.parse()
         for line in lines:
             out.write(line + "\n")
