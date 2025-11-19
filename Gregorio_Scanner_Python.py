@@ -21,323 +21,322 @@ import glob
 #Patterned in the sample input and outputs
 import re
 
-#This one cretes an empty string for the different identifiers
-input = ""
+class Scanner:
+    def __init__(self):
+        self.tokens = []
 
 #This definition is a switch case that handles the various states of the DFA and handles them accordingly to the token
-def gettoken(state, inputChar, input):
-    match state:
-        case "0":
-            if inputChar in [' ', '\t', '\n']:
-                return "0", None, input
-            elif (inputChar.isalpha() or inputChar == "_"):
-                input += inputChar
-                state = "3"
-                return state, None, input
-            elif inputChar.isdigit():
-                input += inputChar
-                state = "4" 
-                return state, None, input
-            elif inputChar == "/":
-                input += inputChar
-                state = "1"
-                return state, None, input
-            elif inputChar == "(":
-                tokens.append(("LeftParen", inputChar))
-                state = "0"
-                return state, None, input            
-            elif inputChar == ")":
-                tokens.append(("RightParen", inputChar))
-                state = "0"
-                return state, None, input            
-            elif inputChar == ";":
-                tokens.append(("Semicolon", inputChar))
-                state = "0"
-                return state, None, input            
-            elif inputChar == ",":
-                tokens.append(("Comma", inputChar))
-                state = "0"
-                return state, None, input                     
-            elif inputChar == "+":
-                tokens.append(("Plus", inputChar))
-                state = "0"
-                return state, None, input
-            elif inputChar == "-":
-                tokens.append(("Minus", inputChar))
-                state = "0"
-                return state, None, input
-            elif inputChar == "=":
-                tokens.append(("Equal", inputChar))
-                state = "0"
-                return state, None, input
-            elif inputChar == '"':
-                input += inputChar
-                state = "10" 
-                return state, None, input
-            elif inputChar == ":":
-                input += inputChar
-                state = "11" 
-                return state, None, input
-            elif inputChar == "*":
-                input += inputChar
-                state = "12" 
-                return state, None, input
-            elif inputChar == "<":
-                input += inputChar
-                state = "13" 
-                return state, None, input
-            elif inputChar == ">":
-                input += inputChar
-                state = "14" 
-                return state, None, input
-            elif inputChar == "!":
-                input += inputChar
-                state = "15" 
-                return state, None, input
-            else:
-                tokens.append(("LexicalError: ", "Lexical Error: Illegal character/character sequence"))
-                state = "0"
-                input = "" 
-                return state, None, input
-        case "1":
-            if inputChar == "/":
-                state = "2"
-                return state, None, input
-            else:
-                state = "divide"
-                return state, inputChar, input
-        case "2":
-            if inputChar == '\n':
-                state = "0"
-                return state, None, input
-            else:
-                state = "2"
-                input = ""
-                return state, None, input
-        case "3":
-            if (inputChar.isalpha() or inputChar.isdigit() or inputChar == "_"):
-                state = "3"
-                input += inputChar 
-                return state, None, input 
-            else:
-                state = "ident"
-                return state, None, input
-        case "4":
-            if inputChar.isdigit():
-                input += inputChar
-                state = "4"
-                return state, None, input
-            elif (inputChar == "e" or inputChar == "E"):
-                input += inputChar
-                state = "6" 
-                return state, None, input
-            elif inputChar == ".":
-                input += inputChar
-                state = "5" 
-                return state, None, input
-            else:
-                state = "num"
-                return state, inputChar, input
-        case "5":
-            if inputChar.isdigit():
-                input += inputChar
-                state = "9"
-                return state, None, input
-            else:
-                tokens.append(("LexicalError: ", "Invalid number format"))
-                state = "0"
-                input = "" 
-                return state, None, input
-        case "6":
-            if inputChar.isdigit():
-                input += inputChar
-                state = "8"
-                return state, None, input
-            elif (inputChar == "+" or inputChar == "-"):
-                input += inputChar
-                state = "7"
-                return state, None, input
-            else:
-                tokens.append(("LexicalError: ", "Invalid number format"))
-                state = "0"
-                input = "" 
-                return state, None, input
-        case "7":
-            if inputChar.isdigit():
-                input += inputChar
-                state = "8"
-                return state, None, input
-            else:
-                tokens.append(("LexicalError: ", "Invalid number format"))
-                state = "0"
-                input = "" 
-                return state, None, input
-        case "8":
-            if inputChar.isdigit():
-                input += inputChar
-                state = "8"
-                return state, None, input
-            else:
-                state = "num"
-                return state, inputChar, input
-        case "9":
-            if inputChar.isdigit():
-                input += inputChar
-                state = "9"
-                return state, None, input
-            elif (inputChar == "e" or inputChar == "E"):
-                input += inputChar
-                state = "6"
-                return state, None, input
-            else:
-                state = "num"
-                return state, inputChar, input
-        case "10":
-            if inputChar == '\n':
-                tokens.append(("LexicalError: ", "Unterminated string"))
-                state = "0"
-                input = "" 
-                return state, inputChar, input
-            elif inputChar == '"':
-                tokens.append(("String", input + '"'))
-                state = "0"
-                input = ""
-                return state, None, input
-            else:
-                state = "10"
-                input += inputChar
-                return state, None, input
-        case "11":
-            if(inputChar == "="):
-                tokens.append(("Assign", input + "="))
-                state = "0"
-                input = ""
-                return state, None, input
-            else:
-                state = "colon"
-                return state, inputChar, input
-        case "12":
-            if(inputChar == "*"):
-                tokens.append(("Raise", input + "*"))
-                state = "0"
-                input = ""
-                return state, None, input
-            else:
-                state = "multiply"
-                return state, inputChar, input
-        case "13":
-            if(inputChar == "="):
-                tokens.append(("LTEqual", input + "="))
-                state = "0"
-                input = ""
-                return state, None, input
-            else:
-                state = "lessthan"
-                return state, inputChar, input
-        case "14":
-            if(inputChar == "="):
-                tokens.append(("GTEqual", input + "="))
-                state = "0"
-                input = ""
-                return state, None, input
-            else:
-                state = "greaterthan"
-                return state, inputChar, input
-        case "15":
-            if(inputChar == "="):
-                tokens.append(("Not Equal", input + "="))
-                state = "0"
-                input = ""
-                return state, None, input
-            else:
-                tokens.append(("LexicalError: ", "Lexical Error: Illegal character/character sequence"))
-                state = "0"
-                input = "" 
-                return state, None, input
-        case "divide":
-            tokens.append(("Divide", input))
-            state = "0"
-            input = "" 
-            return state, inputChar, input
-        case "num":
-            tokens.append(("Num", input))
-            state = "0"
-            input = "" 
-            return state, inputChar, input
-        case "ident":
-            if(input == "PRINT"):
-                tokens.append(("Print", input))
+    def gettoken(self, state, inputChar, input):
+        tokens = self.tokens
+        match state:
+            case "0":
+                if inputChar in [' ', '\t', '\n']:
+                    return "0", None, input
+                elif (inputChar.isalpha() or inputChar == "_"):
+                    input += inputChar
+                    state = "3"
+                    return state, None, input
+                elif inputChar.isdigit():
+                    input += inputChar
+                    state = "4" 
+                    return state, None, input
+                elif inputChar == "/":
+                    input += inputChar
+                    state = "1"
+                    return state, None, input
+                elif inputChar == "(":
+                    tokens.append(("LeftParen", inputChar))
+                    state = "0"
+                    return state, None, input            
+                elif inputChar == ")":
+                    tokens.append(("RightParen", inputChar))
+                    state = "0"
+                    return state, None, input            
+                elif inputChar == ";":
+                    tokens.append(("Semicolon", inputChar))
+                    state = "0"
+                    return state, None, input            
+                elif inputChar == ",":
+                    tokens.append(("Comma", inputChar))
+                    state = "0"
+                    return state, None, input                     
+                elif inputChar == "+":
+                    tokens.append(("Plus", inputChar))
+                    state = "0"
+                    return state, None, input
+                elif inputChar == "-":
+                    tokens.append(("Minus", inputChar))
+                    state = "0"
+                    return state, None, input
+                elif inputChar == "=":
+                    tokens.append(("Equal", inputChar))
+                    state = "0"
+                    return state, None, input
+                elif inputChar == '"':
+                    input += inputChar
+                    state = "10" 
+                    return state, None, input
+                elif inputChar == ":":
+                    input += inputChar
+                    state = "11" 
+                    return state, None, input
+                elif inputChar == "*":
+                    input += inputChar
+                    state = "12" 
+                    return state, None, input
+                elif inputChar == "<":
+                    input += inputChar
+                    state = "13" 
+                    return state, None, input
+                elif inputChar == ">":
+                    input += inputChar
+                    state = "14" 
+                    return state, None, input
+                elif inputChar == "!":
+                    input += inputChar
+                    state = "15" 
+                    return state, None, input
+                else:
+                    tokens.append(("LexicalError: ", "Lexical Error: Illegal character/character sequence"))
+                    state = "0"
+                    input = "" 
+                    return state, None, input
+            case "1":
+                if inputChar == "/":
+                    state = "2"
+                    return state, None, input
+                else:
+                    state = "divide"
+                    return state, inputChar, input
+            case "2":
+                if inputChar == '\n':
+                    state = "0"
+                    return state, None, input
+                else:
+                    state = "2"
+                    input = ""
+                    return state, None, input
+            case "3":
+                if (inputChar.isalpha() or inputChar.isdigit() or inputChar == "_"):
+                    state = "3"
+                    input += inputChar 
+                    return state, None, input 
+                else:
+                    state = "ident"
+                    return state, None, input
+            case "4":
+                if inputChar.isdigit():
+                    input += inputChar
+                    state = "4"
+                    return state, None, input
+                elif (inputChar == "e" or inputChar == "E"):
+                    input += inputChar
+                    state = "6" 
+                    return state, None, input
+                elif inputChar == ".":
+                    input += inputChar
+                    state = "5" 
+                    return state, None, input
+                else:
+                    state = "num"
+                    return state, inputChar, input
+            case "5":
+                if inputChar.isdigit():
+                    input += inputChar
+                    state = "9"
+                    return state, None, input
+                else:
+                    tokens.append(("LexicalError: ", "Invalid number format"))
+                    state = "0"
+                    input = "" 
+                    return state, None, input
+            case "6":
+                if inputChar.isdigit():
+                    input += inputChar
+                    state = "8"
+                    return state, None, input
+                elif (inputChar == "+" or inputChar == "-"):
+                    input += inputChar
+                    state = "7"
+                    return state, None, input
+                else:
+                    tokens.append(("LexicalError: ", "Invalid number format"))
+                    state = "0"
+                    input = "" 
+                    return state, None, input
+            case "7":
+                if inputChar.isdigit():
+                    input += inputChar
+                    state = "8"
+                    return state, None, input
+                else:
+                    tokens.append(("LexicalError: ", "Invalid number format"))
+                    state = "0"
+                    input = "" 
+                    return state, None, input
+            case "8":
+                if inputChar.isdigit():
+                    input += inputChar
+                    state = "8"
+                    return state, None, input
+                else:
+                    state = "num"
+                    return state, inputChar, input
+            case "9":
+                if inputChar.isdigit():
+                    input += inputChar
+                    state = "9"
+                    return state, None, input
+                elif (inputChar == "e" or inputChar == "E"):
+                    input += inputChar
+                    state = "6"
+                    return state, None, input
+                else:
+                    state = "num"
+                    return state, inputChar, input
+            case "10":
+                if inputChar == '\n':
+                    tokens.append(("LexicalError: ", "Unterminated string"))
+                    state = "0"
+                    input = "" 
+                    return state, inputChar, input
+                elif inputChar == '"':
+                    tokens.append(("String", input + '"'))
+                    state = "0"
+                    input = ""
+                    return state, None, input
+                else:
+                    state = "10"
+                    input += inputChar
+                    return state, None, input
+            case "11":
+                if(inputChar == "="):
+                    tokens.append(("Assign", input + "="))
+                    state = "0"
+                    input = ""
+                    return state, None, input
+                else:
+                    state = "colon"
+                    return state, inputChar, input
+            case "12":
+                if(inputChar == "*"):
+                    tokens.append(("Raise", input + "*"))
+                    state = "0"
+                    input = ""
+                    return state, None, input
+                else:
+                    state = "multiply"
+                    return state, inputChar, input
+            case "13":
+                if(inputChar == "="):
+                    tokens.append(("LTEqual", input + "="))
+                    state = "0"
+                    input = ""
+                    return state, None, input
+                else:
+                    state = "lessthan"
+                    return state, inputChar, input
+            case "14":
+                if(inputChar == "="):
+                    tokens.append(("GTEqual", input + "="))
+                    state = "0"
+                    input = ""
+                    return state, None, input
+                else:
+                    state = "greaterthan"
+                    return state, inputChar, input
+            case "15":
+                if(inputChar == "="):
+                    tokens.append(("Not Equal", input + "="))
+                    state = "0"
+                    input = ""
+                    return state, None, input
+                else:
+                    tokens.append(("LexicalError: ", "Lexical Error: Illegal character/character sequence"))
+                    state = "0"
+                    input = "" 
+                    return state, None, input
+            case "divide":
+                tokens.append(("Divide", input))
                 state = "0"
                 input = "" 
                 return state, inputChar, input
-            elif(input == "IF"):
-                tokens.append(("If", input))
+            case "num":
+                tokens.append(("Num", input))
                 state = "0"
                 input = "" 
                 return state, inputChar, input
-            elif(input == "ELSE"):
-                tokens.append(("Else", input))
+            case "ident":
+                if(input == "PRINT"):
+                    tokens.append(("Print", input))
+                    state = "0"
+                    input = "" 
+                    return state, inputChar, input
+                elif(input == "IF"):
+                    tokens.append(("If", input))
+                    state = "0"
+                    input = "" 
+                    return state, inputChar, input
+                elif(input == "ELSE"):
+                    tokens.append(("Else", input))
+                    state = "0"
+                    input = "" 
+                    return state, inputChar, input
+                elif(input == "ENDIF"):
+                    tokens.append(("Endif", input))
+                    state = "0"
+                    input = "" 
+                    return state, inputChar, input
+                elif(input == "SQRT"):
+                    tokens.append(("Sqrt", input))
+                    state = "0"
+                    input = "" 
+                    return state, inputChar, input
+                elif(input == "AND"):
+                    tokens.append(("And", input))
+                    state = "0"
+                    input = "" 
+                    return state, inputChar, input
+                elif(input == "OR"):
+                    tokens.append(("Or", input))
+                    state = "0"
+                    input = "" 
+                    return state, inputChar, input
+                elif(input == "NOT"):
+                    tokens.append(("Not", input))
+                    state = "0"
+                    input = "" 
+                    return state, inputChar, input
+                else:
+                    tokens.append(("Identifier", input))
+                    state = "0"
+                    input = ""
+                    return state, inputChar, input
+            case "colon":
+                tokens.append(("Colon", input))
                 state = "0"
                 input = "" 
                 return state, inputChar, input
-            elif(input == "ENDIF"):
-                tokens.append(("Endif", input))
+            case "multiply":
+                tokens.append(("Multiply", input))
                 state = "0"
                 input = "" 
                 return state, inputChar, input
-            elif(input == "SQRT"):
-                tokens.append(("Sqrt", input))
+            case "lessthan":
+                tokens.append(("Less Than", input))
                 state = "0"
                 input = "" 
                 return state, inputChar, input
-            elif(input == "AND"):
-                tokens.append(("And", input))
+            case "greaterthan":
+                tokens.append(("Greater Than", input))
                 state = "0"
                 input = "" 
                 return state, inputChar, input
-            elif(input == "OR"):
-                tokens.append(("Or", input))
-                state = "0"
-                input = "" 
-                return state, inputChar, input
-            elif(input == "NOT"):
-                tokens.append(("Not", input))
-                state = "0"
-                input = "" 
-                return state, inputChar, input
-            else:
-                tokens.append(("Identifier", input))
-                state = "0"
-                input = ""
-                return state, inputChar, input
-        case "colon":
-            tokens.append(("Colon", input))
-            state = "0"
-            input = "" 
-            return state, inputChar, input
-        case "multiply":
-            tokens.append(("Multiply", input))
-            state = "0"
-            input = "" 
-            return state, inputChar, input
-        case "lessthan":
-            tokens.append(("Less Than", input))
-            state = "0"
-            input = "" 
-            return state, inputChar, input
-        case "greaterthan":
-            tokens.append(("Greater Than", input))
-            state = "0"
-            input = "" 
-            return state, inputChar, input
 
 # This gets all of the txt files in the current directory
-def scan():
-    input_files = glob.glob("input*.txt")  
-    generated_files = []
+    def scan(self, infile):
+        self.tokens = []
 
-    for infile in input_files:
-        # Extract number at the end of filename so that we can attach it to the output file like how it is patterned in the sample files
         match = re.search(r'(\d+)\.txt$', infile)
         if match:
             num = match.group(1)
@@ -353,9 +352,6 @@ def scan():
         else:
             outfile = f"{base_name}.txt"
 
-        # Clears the tokens for each file
-        global tokens 
-        tokens = []
         with open(infile, "r") as f:
             lines = f.readlines()
 
@@ -371,30 +367,37 @@ def scan():
                 if pushback is not None:
                     n = pushback
                     pushback = None
-                    state, pushback, input_str = gettoken(state, n, input_str)
+                    state, pushback, input_str = self.gettoken(state, n, input_str)
                 
                 #This is where the reprocessing happens
-                state, pushback, input_str = gettoken(state, x, input_str)
+                state, pushback, input_str = self.gettoken(state, x, input_str)
 
                 #This is to account for the elements that get stuck in num and arent able to process themselves so that it gets pushed out
                 if state in ("num", "divide", "ident", "colon", "multiply", "lessthan", "greaterthan"):
-                    state, pushback, input_str = gettoken(state, x, input_str)
+                    state, pushback, input_str = self.gettoken(state, x, input_str)
 
             #This is to account for the last element that might be stuck in pushback states so that it gets pushed out
             if state in ("num", "4") and input_str != "":
-                tokens.append(("Num", input_str))
+                self.tokens.append(("Num", input_str))
             elif state == "1":
-                tokens.append(("Divide", input_str))
+                self.tokens.append(("Divide", input_str))
             elif pushback is not None:
-                gettoken(state, pushback, input_str)
+                self.gettoken(state, pushback, input_str)
 
         # Appends the EndOfFile after the scanning
-        tokens.append(("EndOfFile", ""))
+        self.tokens.append(("EndOfFile", ""))
 
         # Writes everything to corresponding output file
         with open(outfile, "w") as out:
-            for tokentype, tokenvalue in tokens:
+            for tokentype, tokenvalue in self.tokens:
                 out.write(f"{tokentype:<17}{tokenvalue}\n")
 
-        generated_files.append(outfile)
-    return generated_files
+        return outfile
+
+    def run_inputs(self):
+        input_files = glob.glob("input*.txt")  
+        generated_files = []
+        for infile in input_files:
+            out = self.scan(infile)
+            generated_files.append(out)
+        return generated_files
