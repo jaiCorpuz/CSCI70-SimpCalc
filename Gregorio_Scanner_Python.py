@@ -397,6 +397,7 @@ class Scanner:
 
         return outfile
 
+    # Loops through all the input files
     def run_inputs(self):
         input_files = glob.glob("input*.txt")  
         generated_files = []
