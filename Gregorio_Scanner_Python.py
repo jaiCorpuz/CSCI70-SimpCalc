@@ -1,5 +1,5 @@
 ##README
-##To run this file, go to the command line of where the file is located and type python scanner.py
+##To run this file, go to the command line of where the file is located and type python Gregorio_Scanner_Python.py
 ##ensure that you have python already installed within your machine
 
 # I hereby attest to the truth of the following facts:
@@ -14,11 +14,14 @@
 # obtained from another source, it has been clearly noted with citations in the
 # comments of my program.
 
+#Wah
+
 #This import allows files to be found by pathnames using pattern matching rules similar to the Unix shell to scan all the files in the directory
 #https://docs.python.org/3/library/glob.html
 import glob
 #This import provides regular expression matching operations similar to those found in Perl. This is to add the number at the end of the file similar to those
 #Patterned in the sample input and outputs
+#https://docs.python.org/3/library/re.html
 import re
 
 class Scanner:
