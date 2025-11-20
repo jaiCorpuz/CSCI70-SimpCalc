@@ -22,12 +22,15 @@ class Parser:
     # Initializes the parser using the scanner output file
     def __init__(self, token_file):
         self.inputname = token_file
+
         # Extracts the tokens and lexemes
         self.tokens, self.lexemes = self.load_tokens(token_file)
+
         # Ensures the last token is EOF
         if not self.tokens or self.tokens[-1] != "EndOfFile":
             self.tokens.append("EndOfFile")
             self.lexemes.append("")
+
         # Starts reading tokens from index 0
         self.index = 0
         self.current_token = self.tokens[self.index] if self.tokens else "EndOfFile"
@@ -64,6 +67,7 @@ class Parser:
     # Move the parser forward to the next token
     # Ensures parser never crashes due to going beyond EOF
     def advance(self):
+
         # Move forward safely
         if self.index < len(self.tokens) - 1:
             self.index += 1
@@ -73,6 +77,7 @@ class Parser:
             self.index = len(self.tokens) - 1
             self.current_token = "EndOfFile"
 
+    # Checks if current token matches expected token
     def expect(self, token_type):
         if self.current_token == token_type:
             self.advance()
@@ -87,7 +92,7 @@ class Parser:
         try:
             self.program()
         except Exception:
-            # parsing errors are recorded in self.errors; we continue to finalize output
+            # Parsing errors are recorded in self.errors; Continue to finalize output
             pass
 
         # Determine original input filename (reconstruct input#.txt)
@@ -98,16 +103,19 @@ class Parser:
         else:
             original = self.inputname.replace("sample_output_scan", "input")
 
+        # Determine if program is valid
         if not self.errors:
             self.output_lines.append(f"{original} is a valid SimpCalc program")
         else:
             self.output_lines.append(f"{original} is not a valid SimpCalc program")
 
+        # Returns output lines
         return self.output_lines
         
 
     # Grammar rules
     # --------------------------------------------------
+    # program -> Highest level of grammar rules
     def program(self):
         while self.current_token != "EndOfFile":
             if self.current_token in ("Identifier", "Print", "If"):
@@ -117,7 +125,7 @@ class Parser:
                 break
         self.expect("EndOfFile")
 
-    # stmt_list → continues until Else, Endif, or EndOfFile
+    # stmt_list -> continues until Else, Endif, or EndOfFile
     def stmt_list(self):
         # Top-level statements stop only at EOF
         while self.current_token not in ("EndOfFile",):
@@ -130,6 +138,7 @@ class Parser:
                 self.errors.append(f"Unexpected token {self.current_token}")
                 return
 
+    # stmt_list_block -> continues inside IF block
     def stmt_list_block(self):
         while self.current_token not in ("Else", "Endif"):
             if self.current_token == "Semicolon":
@@ -140,6 +149,7 @@ class Parser:
                 self.errors.append(f"Unexpected token in block: {self.current_token}")
                 break
 
+    # stmt -> Determines which statement should be parsed next
     def stmt(self):
         if self.current_token == "Identifier":
             self.assign_stmt()
@@ -151,17 +161,17 @@ class Parser:
             self.errors.append(f"Unexpected token {self.current_token}")
             raise Exception(f"Syntax Error: Unexpected token {self.current_token}")
 
-    # assignment → Identifier Assign expr [Semicolon]
+    # assignment -> Identifier Assign expr [Semicolon]
     def assign_stmt(self):
         self.expect("Identifier")
         self.expect("Assign")
         self.expr()
-        # allow optional semicolon before block boundary (but require it normally)
+        # Allow optional semicolon before block boundary (but require it normally)
         if self.current_token == "Semicolon":
             self.expect("Semicolon")
         self.output_lines.append("Assignment Statement Recognized")
 
-    # print → Print LeftParen expr_list RightParen [Semicolon]
+    # print -> Print LeftParen expr_list RightParen [Semicolon]
     def print_stmt(self):
         self.expect("Print")
         self.expect("LeftParen")
@@ -171,7 +181,7 @@ class Parser:
             self.expect("Semicolon")
         self.output_lines.append("Print Statement Recognized")
 
-    # if → If expr Colon stmt_list Else stmt_list Endif [Semicolon]
+    # if -> If expr Colon stmt_list Else stmt_list Endif [Semicolon]
     def if_stmt(self):
         self.expect("If")
         self.expr()
@@ -193,24 +203,24 @@ class Parser:
 
         self.output_lines.append("If Statement Ends")
 
-    # expression list: expr (Comma expr)*
+    # Expression list: expr (Comma expr)*
     def expr_list(self):
         self.expr()
         while self.current_token == "Comma":
             self.expect("Comma")
             self.expr()
 
-    # expr → handles basic literal/identifier, unary minus, parentheses
-        # expr → primary (operator primary)*
+    # expr -> handles basic literal/identifier, unary minus, parentheses
+        # expr -> primary (operator primary)*
     def expr(self):
         self.primary()
 
-        # operators allowed in SimpCalc
+        # Operators allowed in SimpCalc
         operator_tokens = {
             "Plus", "Minus", "Multiply", "Divide",
             "Raise",
 
-            # relational operators your scanner outputs
+            # Relational operators your scanner outputs
             "Greater Than",   # >
             "Less Than",      # <
             "GTEqual",        # >=
@@ -223,14 +233,15 @@ class Parser:
         }
 
         while self.current_token in operator_tokens:
-            self.advance()      # consume operator
-            self.primary()      # consume next part of expression
+            self.advance()      # Consume operator
+            self.primary()      # Consume next part of expression
 
+    # Handles simplest expressions
     def primary(self):
         if self.current_token in ("Identifier", "Num", "String"):
             self.advance()
 
-        elif self.current_token in ("Minus", "Not"):      # unary negation
+        elif self.current_token in ("Minus", "Not"):      # Unary negation
             self.advance()
             self.primary()
 
@@ -239,7 +250,7 @@ class Parser:
             self.expr()
             self.expect("RightParen")
 
-        elif self.current_token == "Sqrt":       # function call: SQRT(expr)
+        elif self.current_token == "Sqrt":       # Function call: SQRT(expr)
             self.advance()
             self.expect("LeftParen")
             self.expr()
@@ -248,6 +259,3 @@ class Parser:
         else:
             self.errors.append(f"Unexpected token in expression: {self.current_token}")
             raise Exception(f"Syntax Error in expression: {self.current_token}")
-
-
-
